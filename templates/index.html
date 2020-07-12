@@ -47,20 +47,16 @@
 
                                     <form action ="{{url_for('insert')}}" method="POST">
                                     
-                                    <div class="form-group">
-                                        <label>Barcode</label>
-                                        <input type="text" class="form-control" name="barcode" required="1">
-                                    </div>
 
                                     <div class="form-group">
                                         <label>Tag ID</label>
-                                        <input type="text" class="form-control" name="tag_id" readonly required="1" >
+                                        <input type="text" class="form-control" name="tag_id" required="1" >
 
                                     </div>
 
                                     <div class="form-group">
                                         <label>Object ID</label>
-                                        <input type="text" class="form-control" name="object_id" required="1" readonly>
+                                        <input type="text" class="form-control" name="object_id" required="1">
 
                                     </div>
 
@@ -101,12 +97,11 @@
                 <th>Action</th>
               </tr>                   
                                                                     
-                {% for row in paired_tags %}
+                {% for row in range(n_rows) %}
                                              
-
               <tr>
-                <td>{{row.tag_id}}</td>
-                <td>{{row.object_id}}</td>
+                <td>{{paired_tags[row][1]}}</td>
+                <td>{{paired_tags[row][2]}}</td>
                 <td>
 
                   <a href="/delete/{{row.tag_id}}" class = "btn btn-danger btn-xs" onclick="return confirm('Are you sure?')">Unpair</a>

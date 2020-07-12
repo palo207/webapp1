@@ -22,15 +22,16 @@ database_conn = 'mssql://@{}/{}?driver={}'.format(server,database,driver)
 engine = create_engine(database_conn)
 conn = engine.connect()
 
-select=pd.read_sql_query('SELECT * FROM [dbo].[rtls_control]',conn)
 
 #creating app object
 app = Flask(__name__)
    
 @app.route('/')
 def Index() :
-    all_data = rtls_control.query.all()
-    return render_template('index.html', paired_tags= all_data)
+    select = pd.read_sql_query('SELECT row_no,tag_id,object_id FROM [dbo].[rtls_control]',conn)
+    select = list(select.values)
+    n_rows = len(select)
+    return render_template('index.html', paired_tags= select,n_rows=n_rows)
 
 
 @app.route('/insert',methods=['POST'])
@@ -38,20 +39,12 @@ def insert ():
     if request.method == 'POST':
         tag_id = request.form['tag_id']
         object_id = request.form['object_id']
-        barcode=request.form['barcode']
         
-        if (len(tag_id) and len(object_id)  >1) and len(barcode)==0: 
-            my_data = rtls_control(tag_id,object_id)
-            db.session.add(my_data)
-            db.session.commit()   
+        
+        if (len(tag_id) and len(object_id)  >1) : 
+            insert = pd.read_sql_query('INSERT INTO [dbo].[rtls_control] ( tag_id,object_id ) Values ({},{}) '.format(tag_id,object_id),conn)  
             flash("Tag paired sucesfully")
             return redirect(url_for('Index'))
-        
-        elif len(barcode)>0:
-            if "rtls" in barcode.lower():
-                return redirect(url_for('Index'))
-            else:
-                return redirect(url_for('Index'))
             
         else:
             return redirect(url_for('Index'))
