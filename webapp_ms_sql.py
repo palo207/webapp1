@@ -9,29 +9,23 @@ Created on Tue Jun 30 13:22:16 2020
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+import pandas as pd
 
+# credentials
 server="LAPTOP-IR2NIHTL"
 database="rtls"
 driver="ODBC Driver 17 for SQL Server"
 
+#connect db
+database_conn = 'mssql://@{}/{}?driver={}'.format(server,database,driver)
+engine = create_engine(database_conn)
+conn = engine.connect()
+
+select=pd.read_sql_query('SELECT * FROM [dbo].[rtls_control]',conn)
+
+#creating app object
 app = Flask(__name__)
-app.secret_key = "Secret_key"
-
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/rtls'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql://{}:''@localhost/{}'.format(server,database)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
- 
-class rtls_control(db.Model):
-    row_no = db.Column(db.Integer,primary_key=True)
-    tag_id=db.Column(db.String(50))
-    object_id=db.Column(db.String(50))
-    
-    def __init__(self,tag_id,object_id):
-        self.tag_id=tag_id
-        self.object_id=object_id
-
    
 @app.route('/')
 def Index() :
