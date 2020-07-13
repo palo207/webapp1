@@ -32,8 +32,10 @@
           <button type="button" class="btn btn-success float-right"
             data-toggle="modal" data-target="#mymodal">Pair tag</button>
             </h2>
+           
+           
             
-            
+           <a href="/logout" class = "btn btn-danger btn-xs float-right" onclick="return confirm('Do you really want to log out?')">Logout user</a>
             
             
             <div id="mymodal" class="modal fade" role = "dialog">
@@ -49,13 +51,13 @@
                                     
 
                                     <div class="form-group">
-                                        <label>Tag ID</label>
+                                        <label>Barcode 1</label>
                                         <input type="text" class="form-control" name="tag_id" required="1" >
 
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Object ID</label>
+                                        <label>Barcode 2</label>
                                         <input type="text" class="form-control" name="object_id" required="1">
 
                                     </div>
@@ -73,18 +75,26 @@
                           </div>         
             
                                                                                                          
-            {% with messages = get_flashed_messages() %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-            {% for message in messages %}
+            {% for category, message in messages %}
 
-
+            {% if category == 'error' %}
+            <div class="alert alert-danger alert-dismissable" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                    <span aria-hidden = "true">x</span>
+                </button>
+                {{message}}
+            </div>
+            
+            {% else %}
             <div class="alert alert-success alert-dismissable" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="close">
                     <span aria-hidden = "true">x</span>
                 </button>
                 {{message}}
             </div>
-                                                                                                                                                                                  
+            {% endif %}                                                                                                                                                                     
             {% endfor %}
             {% endif %}
             {% endwith %}

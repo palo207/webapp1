@@ -23,34 +23,35 @@ from flask_login import (
 )
 from flask_sqlalchemy import SQLAlchemy
 
-#database info
+# Database info
 server="LAPTOP-IR2NIHTL"
 database="rtls"
 driver="ODBC Driver 17 for SQL Server"
 
+# Global vars
+rtls_tag_identifier = "rtls_"
+
 app = Flask(__name__)
 app.secret_key = "Secret_key"
 
-#MySql
+# MySql
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/rtls'
-
-#MS Sql
+# MS Sql
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql://@{}/{}?driver={}'.format(server,database,driver)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
 class users(UserMixin, db.Model):
     id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String(50),unique=True)
     password = db.Column(db.String(50))
-@login_manager.user_loader
-def load_user(user_id):
-    return users.query.get(int(user_id))
 
-    
+
 class rtls_control(db.Model):
     row_no = db.Column(db.Integer,primary_key=True)
     tag_id=db.Column(db.String(50))
@@ -62,9 +63,14 @@ class rtls_control(db.Model):
         self.object_id=object_id
         self.edited_by=edited_by
         
+    
+@login_manager.user_loader
+def load_user(user_id):
+    return users.query.get(int(user_id))
+
+# Login page        
 @app.route('/',methods=['GET','POST'])   
 def login():
-    
     if request.method =='POST':
         username = request.form['username']
         password = request.form['password']
@@ -73,56 +79,75 @@ def login():
             login_user(user)
             return redirect(url_for('Index'))
     return render_template('login.html')
- 
-       
+
+# Logout button      
 @app.route('/logout')  
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
-      
+
+# RTLS Control page      
 @app.route('/rtls_control')
 @login_required
-def Index() :
+def Index():
+    # Get all paired tags and render page with them
     all_data = rtls_control.query.all()
     return render_template('index.html', paired_tags= all_data)
 
+# Pair tag form
 @app.route('/insert',methods=['POST'])
-def insert ():
+def insert():
     if request.method == 'POST':
         tag_id = request.form['tag_id']
         object_id = request.form['object_id']
+        # One of barcodes has to start with RTLS identifier
+        condition1 = tag_id.startswith(rtls_tag_identifier)
+        condition2 = object_id.startswith(rtls_tag_identifier)
         
-        if len(tag_id) and len(object_id)  >1: 
-            my_data = rtls_control(tag_id,object_id,user.username)
+        # If fields are not blank and conditions are met
+        if (tag_id 
+            and object_id 
+            and (condition1 + condition2 == 1)
+            ):
+            
+            # If tag id(barcode 1) is id of tag
+            if condition1:
+                my_data = rtls_control(tag_id,object_id,user.username)
+            # If object_id(barcode 2) is id of tag
+            else:
+                my_data = rtls_control(object_id,tag_id,user.username)
+            # Write ids and username into database
             db.session.add(my_data)
             db.session.commit()   
             flash("Tag paired sucesfully")
             return redirect(url_for('Index'))
         else:
+            flash("Wrong input data", "error")
             return redirect(url_for('Index'))
-        
 
+# Unpair tag button next to pair tag button
+@app.route('/unpair',methods=['POST'])    
+def unpair():
+    tag_id = request.form['tag_id']
+    # Delete tag and material pair
+    my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()   
+    db.session.delete(my_data)
+    print(my_data)
+    db.session.commit()
+    flash("Tag {} unpaired sucesfully".format(tag_id))
+    return redirect(url_for('Index'))
+        
+# Unpair button
 @app.route('/delete/<tag_id>/', methods = ['GET','POST'])
 def delete(tag_id):
     my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()
     db.session.delete(my_data)
     print(my_data)
     db.session.commit()
-    flash("Tag {} unpaired".format(tag_id))
-    return redirect(url_for('Index'))
-
-
-@app.route('/unpair',methods=['POST'])    
-def unpair():
-    tag_id = request.form['tag_id']
-    my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()
-    db.session.delete(my_data)
-    print(my_data)
-    db.session.commit()
-    flash("Tag {} unpaired".format(tag_id))
+    flash("Tag {} unpaired sucesfully".format(tag_id))
     return redirect(url_for('Index'))
     
-  
+# Run function if main  
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
