@@ -2,10 +2,10 @@
 <html lang="en" dir="ltr">
   <head>
 
-    <link href = "{{url_for('static',filename='css/bootstrap.min.css')}}" rel="stylesheet"/>
-
     <meta charset="utf-8">
     <title>RTLS</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
   </head>
   <body>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -32,12 +32,12 @@
           <button type="button" class="btn btn-success float-right"
             data-toggle="modal" data-target="#mymodal">Pair tag</button>
             </h2>
-           
-           
-            
+
+
+
            <a href="/logout" class = "btn btn-danger btn-xs float-right" onclick="return confirm('Do you really want to log out?')">Logout user</a>
-            
-            
+
+
             <div id="mymodal" class="modal fade" role = "dialog">
                             <div class= "modal-dialog">
                             <div class= "modal-content">
@@ -48,7 +48,7 @@
                                 <div class="modal-body">
 
                                     <form action ="{{url_for('insert')}}" method="POST">
-                                    
+
 
                                     <div class="form-group">
                                         <label>Barcode 1</label>
@@ -72,9 +72,9 @@
                                 </div>
                               </div>
                             </div>
-                          </div>         
-            
-                                                                                                         
+                          </div>
+
+
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
@@ -86,7 +86,7 @@
                 </button>
                 {{message}}
             </div>
-            
+
             {% else %}
             <div class="alert alert-success alert-dismissable" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="close">
@@ -94,7 +94,7 @@
                 </button>
                 {{message}}
             </div>
-            {% endif %}                                                                                                                                                                     
+            {% endif %}
             {% endfor %}
             {% endif %}
             {% endwith %}
@@ -102,13 +102,13 @@
 
             <table class="table table-hover table-dark">
               <tr>
-                <th>Tag ID</th>                               
+                <th>Tag ID</th>
                 <th>Paired ID</th>
                 <th>Action</th>
-              </tr>                   
-                                                                    
+              </tr>
+
                 {% for row in paired_tags %}
-                                             
+
               <tr>
                 <td>{{row.tag_id}}</td>
                 <td>{{row.object_id}}</td>
