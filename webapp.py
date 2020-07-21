@@ -31,16 +31,17 @@ driver="ODBC Driver 17 for SQL Server"
 # Global vars
 rtls_tag_identifier = "rtls_"
 
+# Init of flask object
 app = Flask(__name__)
 app.secret_key = "Secret_key"
 
 # MySql
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/rtls'
+
 # MS Sql
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql://@{}/{}?driver={}'.format(server,database,driver)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -111,10 +112,10 @@ def insert():
             and (condition1 + condition2 == 1)
             ):
             
-            # If tag id(barcode 1) is id of tag
+            # If tag id(barcode 1) is id of rtls tag
             if condition1:
                 my_data = rtls_control(tag_id,object_id,user.username)
-            # If object_id(barcode 2) is id of tag
+            # If object_id(barcode 2) is id of rtls tag
             else:
                 my_data = rtls_control(object_id,tag_id,user.username)
             # Write ids and username into database
@@ -137,7 +138,7 @@ def unpair():
     db.session.commit()
     flash("Tag {} unpaired sucesfully".format(tag_id))
     return redirect(url_for('Index'))
-        
+
 # Unpair button
 @app.route('/delete/<tag_id>/', methods = ['GET','POST'])
 def delete(tag_id):
