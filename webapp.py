@@ -36,10 +36,10 @@ app = Flask(__name__)
 app.secret_key = "Secret_key"
 
 # MySql
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/rtls'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/rtls'
 
 # MS Sql
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql://@{}/{}?driver={}'.format(server,database,driver)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql://@{}/{}?driver={}'.format(server,database,driver)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -133,22 +133,30 @@ def unpair():
     tag_id = request.form['tag_id']
     # Delete tag and material pair
     my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()   
-    db.session.delete(my_data)
-    print(my_data)
-    db.session.commit()
-    flash("Tag {} unpaired sucesfully".format(tag_id))
-    return redirect(url_for('Index'))
+    if my_data is not None:   
+        db.session.delete(my_data)
+        print(my_data)
+        db.session.commit()
+        flash("Tag {} unpaired sucesfully".format(tag_id))
+        return redirect(url_for('Index'))
+    else:
+        flash("Tag {} is not paired".format(tag_id),"error")
+        return redirect(url_for('Index'))
 
 # Unpair button
 @app.route('/delete/<tag_id>/', methods = ['GET','POST'])
 def delete(tag_id):
     my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()
-    db.session.delete(my_data)
-    print(my_data)
-    db.session.commit()
-    flash("Tag {} unpaired sucesfully".format(tag_id))
-    return redirect(url_for('Index'))
-    
+    if my_data is not None:
+        db.session.delete(my_data)
+        print(my_data)
+        db.session.commit()
+        flash("Tag {} unpaired sucesfully".format(tag_id))
+        return redirect(url_for('Index'))
+    else:
+        flash("Tag {} is not paired".format(tag_id),"error")
+        return redirect(url_for('Index'))
+        
 # Run function if main  
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
