@@ -4,6 +4,7 @@ Created on Tue Jun 30 13:22:16 2020
 
 @author: PAVA
 """
+import openCV
 
 from flask import (
     Flask, 
@@ -64,7 +65,29 @@ class rtls_control(db.Model):
         self.tag_id=tag_id
         self.object_id=object_id
         self.edited_by=edited_by
+
+class logs(db.Model):
+    row_no = db.Column(db.Integer,primary_key=True)
+    username = db.Column(db.String(50))
+    type_of_change = db.Column(db.String(50))
+    tag_id=db.Column(db.String(50))
+    object_id=db.Column(db.String(50))
+
+    def __init__(self,username,type_of_change,tag_id,object_id):
+        self.username=username
+        self.type_of_change=type_of_change
+        self.tag_id=tag_id
+        self.object_id=object_id
         
+class tag_location(db.Model):
+    row_no = db.Column(db.Integer,primary_key=True)
+    tag_id=db.Column(db.String(50))
+    x=db.Column(db.Integer)
+    y=db.Column(db.Integer)
+
+    def __init__(self,username,type_of_change,tag_id,object_id):
+        self.tag_id=tag_id
+        self.object_id=object_id
     
 @login_manager.user_loader
 def load_user(user_id):
@@ -116,12 +139,17 @@ def insert():
             # If tag id(barcode 1) is id of rtls tag
             if condition1:
                 my_data = rtls_control(tag_id,object_id,current_user.username)
+                log = logs(current_user.username,"pair",tag_id,object_id)
             # If object_id(barcode 2) is id of rtls tag
             else:
                 my_data = rtls_control(object_id,tag_id,current_user.username)
+                log = logs(current_user.username,"pair",object_id,tag_id)
             # Write ids and username into database
             db.session.add(my_data)
-            db.session.commit()   
+            db.session.commit()
+            db.session.add(log)
+            db.session.commit()  
+           
             flash("Tag paired sucesfully")
             return redirect(url_for('Index'))
         else:
@@ -136,8 +164,10 @@ def unpair():
     my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()   
     if my_data is not None:   
         db.session.delete(my_data)
-        print(my_data)
         db.session.commit()
+        log = logs(current_user.username,"unpair",tag_id,"")
+        db.session.add(log)
+        db.session.commit()  
         flash("Tag {} unpaired sucesfully".format(tag_id))
         return redirect(url_for('Index'))
     else:
@@ -152,12 +182,34 @@ def delete(tag_id):
         db.session.delete(my_data)
         print(my_data)
         db.session.commit()
+        log = logs(current_user.username,"unpair",tag_id,"")
+        db.session.add(log)
+        db.session.commit()  
         flash("Tag {} unpaired sucesfully".format(tag_id))
         return redirect(url_for('Index'))
     else:
         flash("Tag {} is not paired".format(tag_id),"error")
         return redirect(url_for('Index'))
+
+# Locate tag page        
+@app.route ('/locate', methods = ['GET','POST'])
+def locate():
+    all_data = rtls_control.query.all()
+    return render_template('locate.html',paired_tags=all_data)
+
+# Tag location based on dropdown
+@app.route('/locate_tag/<tag_id>/', methods = ['GET','POST'])
+def locate_tag(tag_id):
+    my_data = db.session.query(tag_location).filter_by(tag_id=tag_id).first()
+    if my_data is not None:
+        x = my_data.x
+        y = my_data.y
         
+    
+    
+    
 # Run function if main  
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
+
+

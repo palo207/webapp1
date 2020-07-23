@@ -27,7 +27,7 @@
 {% endblock %}
 
 <!-- forma na parovanie tagov -->
-<div id="mymodal" class="modal fade" role = "dialog">
+<div id="mymodal" class="modal fade" role = "dialog" tabindex="-1">
                 <div class= "modal-dialog">
                 <div class= "modal-content">
                     <div class= "modal-header">
@@ -41,19 +41,19 @@
 
                         <div class="form-group">
                             <label>Barcode 1</label>
-                            <input type="text" class="form-control" name="tag_id" required="1" >
+                            <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="tag_id" required="1" >
 
                         </div>
 
                         <div class="form-group">
                             <label>Barcode 2</label>
-                            <input type="text" class="form-control" name="object_id" required="1">
+                            <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="object_id" required="1">
 
                         </div>
 
                         <div class="form-group">
                             <button class="btn btn-primary" type="submit">Pair Tag</button>
-
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
 
                         </form>
@@ -65,7 +65,7 @@
 <!-- forma na parovanie tagov -->
 
 <!-- forma na odparovanie tagov -->
-<div id="mymodal1" class="modal fade" role = "dialog">
+<div id="mymodal1" class="modal fade" role = "dialog" tabindex="-1">
   <div class= "modal-dialog">
   <div class= "modal-content">
       <div class= "modal-header">
@@ -78,14 +78,14 @@
 
           <div class="form-group">
               <label>Tag ID</label>
-              <input type="text" class="form-control" name="tag_id" required="1">
+              <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="tag_id" required="1">
 
           </div>
 
 
           <div class="form-group">
               <button class="btn btn-primary" type="submit">Unpair Tag</button>
-
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
 
           </form>
