@@ -205,7 +205,7 @@ def locate_tag(tag_id):
     
     my_data = db.session.query(tag_location).filter_by(tag_id=tag_id).first()
     if my_data is not None:
-        x = 400
+        x = my_data.x
         y = my_data.y
         color=(0,0,255)
         thickness=-1
@@ -224,7 +224,7 @@ def locate_tag(tag_id):
         response.headers['Pragma'] = 'no-cache'
         return response  
     else:
-        redirect(url_for('locate'))
+       return redirect(url_for('locate'))
     
 # Run function if main  
 if __name__ == '__main__':
