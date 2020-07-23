@@ -4,7 +4,8 @@ Created on Tue Jun 30 13:22:16 2020
 
 @author: PAVA
 """
-import openCV
+import cv2
+import os
 
 from flask import (
     Flask, 
@@ -12,7 +13,8 @@ from flask import (
     request, 
     redirect, 
     url_for, 
-    flash
+    flash,
+    make_response
 )
 from flask_login import (
     LoginManager,
@@ -195,18 +197,34 @@ def delete(tag_id):
 @app.route ('/locate', methods = ['GET','POST'])
 def locate():
     all_data = rtls_control.query.all()
-    return render_template('locate.html',paired_tags=all_data)
+    return render_template('locate.html',paired_tags=all_data,img_path="layout.jpg")
 
 # Tag location based on dropdown
 @app.route('/locate_tag/<tag_id>/', methods = ['GET','POST'])
 def locate_tag(tag_id):
+    
     my_data = db.session.query(tag_location).filter_by(tag_id=tag_id).first()
     if my_data is not None:
-        x = my_data.x
+        x = 400
         y = my_data.y
-        
-    
-    
+        color=(0,0,255)
+        thickness=-1
+        radius = 20   
+        directory_path = os.path.dirname(__file__)
+        file_path = os.path.join(directory_path, "static/layout.jpg")
+        new_filepath = os.path.join(directory_path, "static/layout1.jpg")
+        img=cv2.imread(file_path)
+        img1=cv2.circle(img,(x,y),radius,color,thickness)
+        cv2.imwrite(new_filepath, img1)
+        all_data = rtls_control.query.all()
+        print("vybavene")
+        response= make_response(render_template('locate.html', paired_tags=all_data, img_path="layout1.jpg"))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, public, max-age=0'
+        response.headers["Expires"] = 0
+        response.headers['Pragma'] = 'no-cache'
+        return response  
+    else:
+        redirect(url_for('locate'))
     
 # Run function if main  
 if __name__ == '__main__':
