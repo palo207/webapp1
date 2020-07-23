@@ -31,6 +31,7 @@ driver="ODBC Driver 17 for SQL Server"
 # Global vars
 rtls_tag_identifier = "rtls_"
 
+
 # Init of flask object
 app = Flask(__name__)
 app.secret_key = "Secret_key"
@@ -51,7 +52,7 @@ class users(UserMixin, db.Model):
     id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String(50),unique=True)
     password = db.Column(db.String(50))
-
+    
 
 class rtls_control(db.Model):
     row_no = db.Column(db.Integer,primary_key=True)
@@ -94,7 +95,7 @@ def logout():
 def Index():
     # Get all paired tags and render page with them
     all_data = rtls_control.query.all()
-    return render_template('index.html', paired_tags= all_data)
+    return render_template('index.html', paired_tags= all_data, user= current_user.username)
 
 # Pair tag form
 @app.route('/insert',methods=['POST'])
@@ -114,10 +115,10 @@ def insert():
             
             # If tag id(barcode 1) is id of rtls tag
             if condition1:
-                my_data = rtls_control(tag_id,object_id,user.username)
+                my_data = rtls_control(tag_id,object_id,current_user.username)
             # If object_id(barcode 2) is id of rtls tag
             else:
-                my_data = rtls_control(object_id,tag_id,user.username)
+                my_data = rtls_control(object_id,tag_id,current_user.username)
             # Write ids and username into database
             db.session.add(my_data)
             db.session.commit()   
