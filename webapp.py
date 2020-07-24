@@ -198,9 +198,10 @@ def insert():
 def unpair():
     tag_id = request.form['tag_id']
     # Delete tag and material pair
-    my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()   
+    my_data= db.session.query(rtls_tags).filter_by(tag_id=tag_id).first()   
     if my_data is not None:   
-        db.session.delete(my_data)
+        my_data.paired=0
+        my_data.paired_id=""
         db.session.commit()
         log = logs(current_user.username,"unpair",tag_id,"")
         db.session.add(log)
@@ -211,22 +212,26 @@ def unpair():
         flash("Tag {} is not paired".format(tag_id),"error")
         return redirect(url_for('Index'))
 
-# Unpair button
-@app.route('/delete/<tag_id>/', methods = ['GET','POST'])
-def delete(tag_id):
-    my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()
-    if my_data is not None:
-        db.session.delete(my_data)
-        print(my_data)
-        db.session.commit()
-        log = logs(current_user.username,"unpair",tag_id,"")
-        db.session.add(log)
-        db.session.commit()  
-        flash("Tag {} unpaired sucesfully".format(tag_id))
-        return redirect(url_for('Index'))
-    else:
-        flash("Tag {} is not paired".format(tag_id),"error")
-        return redirect(url_for('Index'))
+
+# =============================================================================
+# # # Unpair button
+# # @app.route('/delete/<tag_id>/', methods = ['GET','POST'])
+# # def delete(tag_id):
+# #     my_data= db.session.query(rtls_control).filter_by(tag_id=tag_id).first()
+# #     if my_data is not None:
+# #         db.session.delete(my_data)
+# #         print(my_data)
+# #         db.session.commit()
+# #         log = logs(current_user.username,"unpair",tag_id,"")
+# #         db.session.add(log)
+# #         db.session.commit()  
+# #         flash("Tag {} unpaired sucesfully".format(tag_id))
+# #         return redirect(url_for('Index'))
+# #     else:
+# #         flash("Tag {} is not paired".format(tag_id),"error")
+# #         return redirect(url_for('Index'))
+# =============================================================================
+
 
 # Locate tag page        
 @app.route ('/locate', methods = ['GET','POST'])
