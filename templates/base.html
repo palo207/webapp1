@@ -70,14 +70,14 @@
   <div class= "modal-content">
       <div class= "modal-header">
 
-          <h4 class="modal-title">Pair Tag</h4>
+          <h4 class="modal-title">Unpair Tag</h4>
       </div>
       <div class="modal-body">
 
           <form action ="{{url_for('unpair')}}" method="POST">
 
           <div class="form-group">
-              <label>Tag ID</label>
+              <label>RTLS Tag ID</label>
               <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="tag_id" required="1">
 
           </div>

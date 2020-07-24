@@ -56,17 +56,31 @@ class users(UserMixin, db.Model):
     username = db.Column(db.String(50),unique=True)
     password = db.Column(db.String(50))
     
-
-class rtls_control(db.Model):
+class rtls_tags(db.Model):
     row_no = db.Column(db.Integer,primary_key=True)
     tag_id=db.Column(db.String(50))
-    object_id=db.Column(db.String(50))
-    edited_by=db.Column(db.String(50))
+    address=db.Column(db.String(50))
+    PosX=db.Column(db.Float())
+    PosY=db.Column(db.Float())
+    zone_id=db.Column(db.String(50))
+    zone_type=db.Column(db.String(50))
+    zone_name=db.Column(db.String(50))
+    zone_enter=db.Column(db.DateTime())
+    paired=db.Column(db.Integer)
+    paired_id=db.Column(db.String(50))
     
     def __init__(self,tag_id,object_id,edited_by):
+        self.row_no=row_no
         self.tag_id=tag_id
-        self.object_id=object_id
-        self.edited_by=edited_by
+        self.address=address
+        self.PosX=PosX
+        self.PosY=PosY
+        self.zone_id=zone_id
+        self.zone_type=zone_type
+        self.zone_name=zone_name
+        self.zone_enter=zone_enter
+        self.paired=paired
+        self.paired_id=paired_id
 
 class logs(db.Model):
     row_no = db.Column(db.Integer,primary_key=True)
@@ -119,8 +133,7 @@ def logout():
 @login_required
 def Index():
     # Get all paired tags and render page with them
-    all_data = rtls_control.query.all()
-    return render_template('index.html', paired_tags= all_data, user= current_user.username)
+    return render_template('index.html', user= current_user.username)
 
 # Pair tag form
 @app.route('/insert',methods=['POST'])
@@ -131,6 +144,10 @@ def insert():
         # One of barcodes has to start with RTLS identifier
         condition1 = tag_id.startswith(rtls_tag_identifier)
         condition2 = object_id.startswith(rtls_tag_identifier)
+        # Condition 3 tag exists in database and is not paired
+        condition3 = db.session.query(rtls_tags.paired).filter_by(tag_id=tag_id).first()
+       # Condition 4 object is not paired with tag
+        condition4 = db.session.query(rtls_tags.paired_id).filter_by(paired_id=object_id).first()
         
         # If fields are not blank and conditions are met
         if (tag_id 
@@ -138,22 +155,40 @@ def insert():
             and (condition1 + condition2 == 1)
             ):
             
-            # If tag id(barcode 1) is id of rtls tag
-            if condition1:
-                my_data = rtls_control(tag_id,object_id,current_user.username)
-                log = logs(current_user.username,"pair",tag_id,object_id)
-            # If object_id(barcode 2) is id of rtls tag
-            else:
-                my_data = rtls_control(object_id,tag_id,current_user.username)
-                log = logs(current_user.username,"pair",object_id,tag_id)
-            # Write ids and username into database
-            db.session.add(my_data)
-            db.session.commit()
-            db.session.add(log)
-            db.session.commit()  
-           
-            flash("Tag paired sucesfully")
-            return redirect(url_for('Index'))
+            # If return is not none the tag exists in db
+            if condition3 is not None:
+                # If tag is paired
+                if not condition3[0]:
+                    # If material is not paired
+                    if condition4 is None:
+                        # Getting the object from database
+                        tag=db.session.query(rtls_tags).filter_by(tag_id=tag_id).first()
+                        # If tag id(barcode 1) is id of rtls tag
+                        if condition1:
+                            tag.paired=1
+                            tag.paired_id=object_id
+                            log = logs(current_user.username,"pair",tag_id,object_id)
+                        # If object_id(barcode 2) is id of rtls tag
+                        else:
+                            tag.paired=1
+                            tag.paired_id=tag_id
+                            log = logs(current_user.username,"pair",object_id,tag_id)
+                        # Write ids and username into database
+                        db.session.commit()
+                        db.session.add(log)
+                        db.session.commit()  
+          
+                        flash("Tag paired sucesfully")
+                        return redirect(url_for('Index'))
+                    else: 
+                     flash("Object is already paired" , "error")
+                     return redirect(url_for('Index'))
+                else: 
+                 flash("Tag is already paired" , "error")
+                 return redirect(url_for('Index'))
+            else: 
+                 flash("Tag is not in database" , "error")
+                 return redirect(url_for('Index'))
         else:
             flash("Wrong input data", "error")
             return redirect(url_for('Index'))
