@@ -32,7 +32,7 @@
                 <div class= "modal-content">
                     <div class= "modal-header">
 
-                        <h4 class="modal-title">Pair Tag</h4>
+                        <h4 class="modal-title">Spárovať tag</h4>
                     </div>
                     <div class="modal-body">
 
@@ -40,20 +40,20 @@
 
 
                         <div class="form-group">
-                            <label>Barcode 1</label>
+                            <label>Čiarový kód 1</label>
                             <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="tag_id" required="1" >
 
                         </div>
 
                         <div class="form-group">
-                            <label>Barcode 2</label>
+                            <label>Čiarový kód 2</label>
                             <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="object_id" required="1">
 
                         </div>
 
                         <div class="form-group">
-                            <button class="btn btn-primary" type="submit">Pair Tag</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button class="btn btn-primary" type="submit">Spárovať tag</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavrieť</button>
                         </div>
 
                         </form>
@@ -70,7 +70,7 @@
   <div class= "modal-content">
       <div class= "modal-header">
 
-          <h4 class="modal-title">Unpair Tag</h4>
+          <h4 class="modal-title">Odpárovať tag</h4>
       </div>
       <div class="modal-body">
 
@@ -84,8 +84,8 @@
 
 
           <div class="form-group">
-              <button class="btn btn-primary" type="submit">Unpair Tag</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button class="btn btn-primary" type="submit">Odpárovať tag</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavrieť</button>
           </div>
 
           </form>
@@ -96,11 +96,46 @@
 </div>
 <!-- forma na odparovanie tagov -->
 
+
+<!-- Forma na lokalizáciu -->
+<div id="mymodal5" class="modal fade" role = "dialog"  tabindex="-1">
+  <div class= "modal-dialog">
+  <div class= "modal-content">
+      <div class= "modal-header">
+
+          <h4 class="modal-title">Lokalizácia tagu</h4>
+      </div>
+      <div class="modal-body">
+
+          <form action ="{{url_for('unpair')}}" method="POST">
+
+          <div class="form-group">
+              <label>Čiarový kód</label>
+              <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="tag_id" required="1">
+
+          </div>
+
+
+          <div class="form-group">
+              <button class="btn btn-primary" type="submit">Lokalizovať</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavrieť</button>
+          </div>
+
+          </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!--Forma na lokalizáciu-->
+
+
+
 <!-- java scripts -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+<script src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
   </body>
 </html>

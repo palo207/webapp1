@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %} RTLS Control {% endblock %}
+{% block title %} RTLS {% endblock %}
 
-{% block heading %} RTLS Control {% endblock %}
+{% block heading %} RTLS {% endblock %}
 {% block body %}
 
 
@@ -10,8 +10,8 @@
 <!-- Logged user -->
 <div class = "container" id="cont1">
 
-<h5>Currently logged in: <b>{{user}}</b>
-<a  href="/logout"><button type="button" class="btn btn-danger btn-xs " onclick="return confirm('Do you really want to log out?')">Log out</button></a>
+<h5>Prihlásený užívateľ: <b>{{user}}</b>
+<a  href="/logout"><button type="button" class="btn btn-danger btn-xs " onclick="return confirm('Naozaj sa chcete odhlásiiť?')">Odhlásiť</button></a>
   </h5>
 
 </div>
@@ -22,20 +22,20 @@
 
     <div class = "jumbotron p-3">
       <div class = "well text-center">
-              <h2>Manage <b>Tags</b></h2>
+              <h2>Spravovať <b>tagy</b></h2>
 
 
 
-          <button id="btn1" type="button" class="btn btn-success btn-lg"
-            data-toggle="modal" data-target="#mymodal">Pair tag</button>
+          <button id="btn1" type="button" class="btn btn-success btn-lg" {{dsb}}
+            data-toggle="modal" data-target="#mymodal">Spárovať tag</button>
 
 
-          <button id="btn1" type="button" class="btn btn-danger btn-lg "
-            data-toggle="modal" data-target="#mymodal1">Unpair tag</button>
+          <button id="btn1" type="button" class="btn btn-danger btn-lg " {{dsb}}
+            data-toggle="modal" data-target="#mymodal1">Odpárovať tag</button>
 
 
-          <a  href="/locate"><button id="btn1" type="button" class="btn btn-info btn-lg "
-            >Locate tags</button></a>
+          <button id="btn1" type="button" class="btn btn-info btn-lg " {{dsb}}
+            data-toggle="modal" data-target="#mymodal5">Lokalizovať tag</button>
 
       </div>
       </div>

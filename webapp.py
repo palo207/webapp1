@@ -133,7 +133,11 @@ def logout():
 @login_required
 def Index():
     # Get all paired tags and render page with them
-    return render_template('index.html', user= current_user.username)
+    if current_user.username=="user":
+        dsb="disabled"
+    else:
+        dsb=""
+    return render_template('index.html', user= current_user.username,dsb=dsb)
 
 # Pair tag form
 @app.route('/insert',methods=['POST'])
@@ -178,19 +182,19 @@ def insert():
                         db.session.add(log)
                         db.session.commit()  
           
-                        flash("Tag paired sucesfully")
+                        flash("Tag úspešne spárovaný")
                         return redirect(url_for('Index'))
                     else: 
-                     flash("Object is already paired" , "error")
+                     flash("Výrobný príkaz už je spárovaný" , "error")
                      return redirect(url_for('Index'))
                 else: 
-                 flash("Tag is already paired" , "error")
+                 flash("Tag je už spárovaný" , "error")
                  return redirect(url_for('Index'))
             else: 
-                 flash("Tag is not in database" , "error")
+                 flash("Tag sa v databáze nenachádza" , "error")
                  return redirect(url_for('Index'))
         else:
-            flash("Wrong input data", "error")
+            flash("Nesprávne zadané vstupné dáta", "error")
             return redirect(url_for('Index'))
 
 # Unpair tag button next to pair tag button
@@ -206,10 +210,10 @@ def unpair():
         log = logs(current_user.username,"unpair",tag_id,"")
         db.session.add(log)
         db.session.commit()  
-        flash("Tag {} unpaired sucesfully".format(tag_id))
+        flash("Tag {} bol úspešne odpárovaný".format(tag_id))
         return redirect(url_for('Index'))
     else:
-        flash("Tag {} is not paired".format(tag_id),"error")
+        flash("Tag {} nie je spárovaný".format(tag_id),"error")
         return redirect(url_for('Index'))
 
 
@@ -236,8 +240,8 @@ def unpair():
 # Locate tag page        
 @app.route ('/locate', methods = ['GET','POST'])
 def locate():
-    all_data = rtls_control.query.all()
-    return render_template('locate.html',paired_tags=all_data,img_path="layout.jpg")
+    #all_data = rtls_control.query.all()
+    return render_template('locate.html',img_path="layout.jpg")
 
 # Tag location based on dropdown
 @app.route('/locate_tag/<tag_id>/', methods = ['GET','POST'])
