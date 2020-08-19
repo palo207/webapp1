@@ -133,11 +133,15 @@ def logout():
 @login_required
 def Index():
     # Get all paired tags and render page with them
+    try:
+        i=request.args['i']
+    except: 
+        i = 0
     if current_user.username=="user":
         dsb="disabled"
     else:
         dsb=""
-    return render_template('index.html', user= current_user.username,dsb=dsb)
+    return render_template('index.html', user= current_user.username,dsb=dsb,i=int(i))
 
 # Pair tag form
 @app.route('/insert',methods=['POST'])
@@ -183,7 +187,7 @@ def insert():
                         db.session.commit()  
           
                         flash("Tag úspešne spárovaný")
-                        return redirect(url_for('Index'))
+                        return redirect(url_for('Index',i=1))
                     else: 
                      flash("Výrobný príkaz už je spárovaný" , "error")
                      return redirect(url_for('Index'))
@@ -192,7 +196,7 @@ def insert():
                  return redirect(url_for('Index'))
             else: 
                  flash("Tag sa v databáze nenachádza" , "error")
-                 return redirect(url_for('Index'))
+                 return redirect(url_for('Index',i=1))
         else:
             flash("Nesprávne zadané vstupné dáta", "error")
             return redirect(url_for('Index'))
