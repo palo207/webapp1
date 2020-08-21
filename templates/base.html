@@ -13,7 +13,7 @@
     {% if i == 1 %}
     <script>
         $(document).ready(function(){
-            $("#mymodal1").modal('show');
+            $("#preparovanie").modal('show');
         });
     </script>
     {% endif %}
@@ -66,7 +66,6 @@
                         </div>
 
                         </form>
-
                     </div>
                   </div>
                 </div>
@@ -135,38 +134,41 @@
       </div>
     </div>
   </div>
-</div>
+</div>      
 <!--Forma na lokalizáciu-->
 
 <!-- Forma na preparovanie -->
-<div id="mymodal5" class="modal fade" role = "dialog"  tabindex="-1">
+{%if i ==1%}
+<div id="preparovanie" class="modal fade" role = "dialog"  tabindex="-1">
   <div class= "modal-dialog">
   <div class= "modal-content">
       <div class= "modal-header">
 
-          <h4 class="modal-title">Lokalizácia tagu</h4>
+          <h4 class="modal-title">Prepárovanie tagu</h4>
       </div>
       <div class="modal-body">
 
-          <form action ="{{url_for('unpair')}}" method="POST">
+          <form action ="{{url_for('change_pair')}}" method="POST" >
 
           <div class="form-group">
-              <label>Zadaný kód {{% code1 %}} je už spárovaný. Chcete ho prepárovať s vami zadaným kódom {{% code2 %}} :</label>
+              
+              <p>Zadaný kód <b>{{code1}}</b> je už spárovaný. Chcete ho prepárovať s vami zadaným kódom <b>{{code2}}</b> :<p>
               
           </div>
 
-
           <div class="form-group">
-              <button class="btn btn-primary" type="submit">Lokalizovať</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavrieť</button>
+              <button class="btn btn-primary" name="yes" value={{code1}}$,${{code2}} type="submit">Áno</button>
+              <button class="btn btn-primary" name="yes"  value= "nie" type="submit">Nie</button>
           </div>
 
           </form>
+          
 
       </div>
     </div>
   </div>
 </div>
+{% endif %}
 <!--Forma na preparovanie-->
 
 

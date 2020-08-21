@@ -135,13 +135,22 @@ def Index():
     # Get all paired tags and render page with them
     try:
         i=request.args['i']
+        code1=request.args['code1']
+        code2=request.args['code2']
     except: 
         i = 0
+        code1 = 0
+        code2 = 0
     if current_user.username=="user":
         dsb="disabled"
     else:
         dsb=""
-    return render_template('index.html', user= current_user.username,dsb=dsb,i=int(i))
+    print(code1,code2)
+    return render_template('index.html', 
+                           user= current_user.username,
+                           dsb=dsb,i=int(i),
+                           code1=code1,
+                           code2=code2)
 
 # Pair tag form
 @app.route('/insert',methods=['POST'])
@@ -149,57 +158,53 @@ def insert():
     if request.method == 'POST':
         tag_id = request.form['tag_id']
         object_id = request.form['object_id']
+        tags =[]
         # One of barcodes has to start with RTLS identifier
         condition1 = tag_id.startswith(rtls_tag_identifier)
         condition2 = object_id.startswith(rtls_tag_identifier)
+        if condition1:
+            tags=[tag_id,object_id]
+        elif condition2 :
+            tags=[object_id,tag_id]
         # Condition 3 tag exists in database and is not paired
-        condition3 = db.session.query(rtls_tags.paired).filter_by(tag_id=tag_id).first()
+        condition3 = db.session.query(rtls_tags.paired).filter_by(tag_id=tags[0]).first()
        # Condition 4 object is not paired with tag
-        condition4 = db.session.query(rtls_tags.paired_id).filter_by(paired_id=object_id).first()
+        condition4 = db.session.query(rtls_tags.paired_id).filter_by(paired_id=tags[1]).first()
         
-        # If fields are not blank and conditions are met
-        if (tag_id 
+        # If fields are blank or conditions are not met
+        if not (tag_id 
             and object_id 
             and (condition1 + condition2 == 1)
-            ):
-            
-            # If return is not none the tag exists in db
-            if condition3 is not None:
-                # If tag is paired
-                if not condition3[0]:
-                    # If material is not paired
-                    if condition4 is None:
-                        # Getting the object from database
-                        tag=db.session.query(rtls_tags).filter_by(tag_id=tag_id).first()
-                        # If tag id(barcode 1) is id of rtls tag
-                        if condition1:
-                            tag.paired=1
-                            tag.paired_id=object_id
-                            log = logs(current_user.username,"pair",tag_id,object_id)
-                        # If object_id(barcode 2) is id of rtls tag
-                        else:
-                            tag.paired=1
-                            tag.paired_id=tag_id
-                            log = logs(current_user.username,"pair",object_id,tag_id)
-                        # Write ids and username into database
-                        db.session.commit()
-                        db.session.add(log)
-                        db.session.commit()  
-          
-                        flash("Tag úspešne spárovaný")
-                        return redirect(url_for('Index',i=1))
-                    else: 
-                     flash("Výrobný príkaz už je spárovaný" , "error")
-                     return redirect(url_for('Index'))
-                else: 
-                 flash("Tag je už spárovaný" , "error")
-                 return redirect(url_for('Index'))
-            else: 
-                 flash("Tag sa v databáze nenachádza" , "error")
-                 return redirect(url_for('Index',i=1))
-        else:
+            ): 
             flash("Nesprávne zadané vstupné dáta", "error")
             return redirect(url_for('Index'))
+        # If return is not none the tag does not exist in db
+        if condition3 is None:
+            flash("Tag sa v databáze nenachádza" , "error")
+            return redirect(url_for('Index'))
+        # If tag is paired
+        if condition3[0]:
+            flash("Tag je už spárovaný" , "error")
+            return redirect(url_for('Index',i=1,code1=tags[0],code2=tags[1]))
+        # If material is paired
+        if condition4 is not None:
+            flash("Výrobný príkaz už je spárovaný" , "error")
+            return redirect(url_for('Index',i=1,code2=tags[1],code1=tags[0]))
+                        
+        # Getting the object from database
+        tag=db.session.query(rtls_tags).filter_by(tag_id=tag_id).first()
+        # Pair tags
+        tag.paired=1
+        tag.paired_id=tags[1]
+        log = logs(current_user.username,"pair",tags[0],tags[1])
+        # Write ids and username into database
+        db.session.commit()
+        db.session.add(log)
+        db.session.commit()  
+  
+        flash("Tag úspešne spárovaný")
+        return redirect(url_for('Index'))
+                 
 
 # Unpair tag button next to pair tag button
 @app.route('/unpair',methods=['POST'])    
@@ -220,6 +225,20 @@ def unpair():
         flash("Tag {} nie je spárovaný".format(tag_id),"error")
         return redirect(url_for('Index'))
 
+# Change pair
+@app.route('/change_pair',methods=['POST'])
+def change_pair():
+    if request.method =='POST':
+        codes = request.form['yes']
+        if codes == "nie":
+            return redirect(url_for('Index'))
+        else:
+            codes = (codes.split("$,$"))
+            my_data= db.session.query(rtls_tags).filter_by(tag_id=codes[0]).first()     
+            my_data.paired_id=codes[1]
+            db.session.commit()
+            return redirect(url_for('Index'))
+    
 
 # =============================================================================
 # # # Unpair button
@@ -266,7 +285,9 @@ def locate_tag(tag_id):
         cv2.imwrite(new_filepath, img1)
         all_data = rtls_control.query.all()
         print("vybavene")
-        response= make_response(render_template('locate.html', paired_tags=all_data, img_path="layout1.jpg"))
+        response= make_response(render_template('locate.html', 
+                                                paired_tags=all_data, 
+                                                img_path="layout1.jpg"))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, public, max-age=0'
         response.headers["Expires"] = 0
         response.headers['Pragma'] = 'no-cache'
