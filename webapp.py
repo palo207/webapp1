@@ -14,7 +14,8 @@ from flask import (
     redirect, 
     url_for, 
     flash,
-    make_response
+    make_response,
+    session
 )
 from flask_login import (
     LoginManager,
@@ -132,26 +133,40 @@ def logout():
 @app.route('/rtls_control')
 @login_required
 def Index():
+
     # Get all paired tags and render page with them
     try:
         i=request.args['i']
-        code1=request.args['code1']
-        code2=request.args['code2']
+        
     except: 
         i = 0
+    try:    
+        code1=request.args['code1']
+        code2=request.args['code2']
+    except:   
         code1 = 0
         code2 = 0
+        
     if current_user.username=="user":
         dsb="disabled"
     else:
         dsb=""
-    print(code1,code2)
+        
+    if 'my_data' in session:
+        print('tu som')
+        mydata = session.get('my_data')
+        print(mydata)
+    else: 
+        mydata=0
+        
     return render_template('index.html', 
                            user= current_user.username,
                            dsb=dsb,i=int(i),
                            code1=code1,
-                           code2=code2)
-
+                           code2=code2,
+                           mydata=mydata)
+    
+      
 # Pair tag form
 @app.route('/insert',methods=['POST'])
 def insert():
@@ -166,11 +181,7 @@ def insert():
             tags=[tag_id,object_id]
         elif condition2 :
             tags=[object_id,tag_id]
-        # Condition 3 tag exists in database and is not paired
-        condition3 = db.session.query(rtls_tags.paired).filter_by(tag_id=tags[0]).first()
-       # Condition 4 object is not paired with tag
-        condition4 = db.session.query(rtls_tags.paired_id).filter_by(paired_id=tags[1]).first()
-        
+       
         # If fields are blank or conditions are not met
         if not (tag_id 
             and object_id 
@@ -178,6 +189,12 @@ def insert():
             ): 
             flash("Nesprávne zadané vstupné dáta", "error")
             return redirect(url_for('Index'))
+        
+        # Condition 3 tag exists in database and is not paired
+        condition3 = db.session.query(rtls_tags.paired).filter_by(tag_id=tags[0]).first()
+        # Condition 4 object is not paired with tag
+        condition4 = db.session.query(rtls_tags.paired_id).filter_by(paired_id=tags[1]).first()
+        
         # If return is not none the tag does not exist in db
         if condition3 is None:
             flash("Tag sa v databáze nenachádza" , "error")
@@ -263,38 +280,67 @@ def change_pair():
 # Locate tag page        
 @app.route ('/locate', methods = ['GET','POST'])
 def locate():
-    #all_data = rtls_control.query.all()
-    return render_template('locate.html',img_path="layout.jpg")
-
-# Tag location based on dropdown
-@app.route('/locate_tag/<tag_id>/', methods = ['GET','POST'])
-def locate_tag(tag_id):
-    
-    my_data = db.session.query(tag_location).filter_by(tag_id=tag_id).first()
-    if my_data is not None:
-        x = my_data.x
-        y = my_data.y
-        color=(0,0,255)
-        thickness=-1
-        radius = 20   
-        directory_path = os.path.dirname(__file__)
-        file_path = os.path.join(directory_path, "static/layout.jpg")
-        new_filepath = os.path.join(directory_path, "static/layout1.jpg")
-        img=cv2.imread(file_path)
-        img1=cv2.circle(img,(x,y),radius,color,thickness)
-        cv2.imwrite(new_filepath, img1)
-        all_data = rtls_control.query.all()
-        print("vybavene")
-        response= make_response(render_template('locate.html', 
-                                                paired_tags=all_data, 
-                                                img_path="layout1.jpg"))
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, public, max-age=0'
-        response.headers["Expires"] = 0
-        response.headers['Pragma'] = 'no-cache'
-        return response  
+    my_data_parsed=[]
+    tag_id = request.form['tag_id']
+    my_data= db.session.query(rtls_tags).filter_by(tag_id=tag_id).first() 
+    if my_data is None:
+        my_data= db.session.query(rtls_tags).filter_by(paired_id=tag_id).first()
+    if my_data is None:
+        flash("Tag {} sa v databáze nenacháadza".format(tag_id),"error")
+        return redirect(url_for('Index'))
     else:
-       return redirect(url_for('locate'))
+        if 'my_data' in session:
+            session.pop('my_data', None)
+            my_data_parsed.append( [my_data.tag_id,
+                    my_data.zone_id,
+                    my_data.zone_type,
+                    my_data.zone_name,
+                    my_data.zone_enter,
+                    my_data.paired_id])
+         
+        session['my_data']=my_data_parsed
+        print(session['my_data'],my_data_parsed)
+        return redirect(url_for('Index',i=2))
+                         
+# Finishing the locate process
+@app.route('/located', methods =['GET','POST'])
+def located():
+    return redirect(url_for('Index',))
+    print('tu_som')
     
+# =============================================================================
+# # Tag location based on dropdown
+# @app.route('/locate_tag/<tag_id>/', methods = ['GET','POST'])
+# def locate_tag(tag_id):
+#     
+#     my_data = db.session.query(tag_location).filter_by(tag_id=tag_id).first()
+#     if my_data is not None:
+#         x = my_data.x
+#         y = my_data.y
+#         color=(0,0,255)
+#         thickness=-1
+#         radius = 20   
+#         directory_path = os.path.dirname(__file__)
+#         file_path = os.path.join(directory_path, "static/layout.jpg")
+#         new_filepath = os.path.join(directory_path, "static/layout1.jpg")
+#         img=cv2.imread(file_path)
+#         img1=cv2.circle(img,(x,y),radius,color,thickness)
+#         cv2.imwrite(new_filepath, img1)
+#         all_data = rtls_control.query.all()
+#         print("vybavene")
+#         response= make_response(render_template('locate.html', 
+#                                                 paired_tags=all_data, 
+#                                                 img_path="layout1.jpg"))
+#         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, public, max-age=0'
+#         response.headers["Expires"] = 0
+#         response.headers['Pragma'] = 'no-cache'
+#         return response  
+#     else:
+#        return redirect(url_for('locate'))
+# =============================================================================
+    
+                    
+
 # Run function if main  
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
