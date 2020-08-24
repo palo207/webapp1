@@ -6,6 +6,7 @@ Created on Tue Jun 30 13:22:16 2020
 """
 import cv2
 import os
+import datetime
 
 from flask import (
     Flask, 
@@ -122,6 +123,32 @@ def login():
             return redirect(url_for('Index'))
     return render_template('login.html')
 
+
+# Function returns tag data for location if the tag is in db
+def get_tag_info(tag_id):
+    my_data_parsed=[]
+    if tag_id.startswith("rtls".lower()):
+        my_data= db.session.query(rtls_tags).filter_by(tag_id=tag_id).first()
+    else:
+        my_data= db.session.query(rtls_tags).filter_by(paired_id=tag_id).first()
+    if my_data is None:
+        return False,my_data_parsed
+        
+    else:
+        if 'my_data' in session:
+            session.pop('my_data', None)
+            my_data_parsed.append( [my_data.tag_id,
+                    my_data.zone_id,
+                    my_data.zone_type,
+                    my_data.zone_name,
+                    my_data.zone_enter,
+                    my_data.paired_id,
+                    my_data.PosX,
+                    my_data.PosY])
+        return True,my_data_parsed 
+
+
+
 # Logout button      
 @app.route('/logout')  
 @login_required
@@ -152,10 +179,15 @@ def Index():
     else:
         dsb=""
         
-    if 'my_data' in session:
-        print('tu som')
+    if 'my_data' in session:   
         mydata = session.get('my_data')
-        print(mydata)
+        tag_id=mydata[0][0] 
+        got_data,mydata=get_tag_info(tag_id)
+        if got_data: 
+            session['my_data']=mydata
+        else:
+            flash("Tag {} sa v databáze nenacháadza".format(tag_id),"error")
+     
     else: 
         mydata=0
         
@@ -254,6 +286,7 @@ def change_pair():
             my_data= db.session.query(rtls_tags).filter_by(tag_id=codes[0]).first()     
             my_data.paired_id=codes[1]
             db.session.commit()
+            flash("Tag bol úspešne spárovaný")
             return redirect(url_for('Index'))
     
 
@@ -280,27 +313,18 @@ def change_pair():
 # Locate tag page        
 @app.route ('/locate', methods = ['GET','POST'])
 def locate():
-    my_data_parsed=[]
     tag_id = request.form['tag_id']
-    my_data= db.session.query(rtls_tags).filter_by(tag_id=tag_id).first() 
-    if my_data is None:
-        my_data= db.session.query(rtls_tags).filter_by(paired_id=tag_id).first()
-    if my_data is None:
-        flash("Tag {} sa v databáze nenacháadza".format(tag_id),"error")
-        return redirect(url_for('Index'))
-    else:
-        if 'my_data' in session:
-            session.pop('my_data', None)
-            my_data_parsed.append( [my_data.tag_id,
-                    my_data.zone_id,
-                    my_data.zone_type,
-                    my_data.zone_name,
-                    my_data.zone_enter,
-                    my_data.paired_id])
-         
+    
+    # Calls get data to fetch data from db    
+    got_data,my_data_parsed = get_tag_info(tag_id)
+    
+    if got_data: 
         session['my_data']=my_data_parsed
         print(session['my_data'],my_data_parsed)
         return redirect(url_for('Index',i=2))
+    else:
+        flash("Tag {} sa v databáze nenacháadza".format(tag_id),"error")
+        return redirect(url_for('Index'))
                          
 # Finishing the locate process
 @app.route('/located', methods =['GET','POST'])

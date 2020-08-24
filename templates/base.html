@@ -26,6 +26,7 @@
     </script>
     {% endif %}
     
+    
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"> -->
 
     <title>{% block title %} {% endblock %}</title>
@@ -46,7 +47,7 @@
 
 <!-- forma na parovanie tagov -->
 <div id="mymodal" class="modal fade" role = "dialog" tabindex="-1">
-                <div class= "modal-dialog">
+                <div class= "modal-dialog modal-dialog-centered">
                 <div class= "modal-content">
                     <div class= "modal-header">
 
@@ -83,7 +84,7 @@
 
 <!-- forma na odparovanie tagov -->
 <div id="mymodal1" class="modal fade" role = "dialog" tabindex="-1">
-  <div class= "modal-dialog">
+  <div class= "modal-dialog modal-dialog-centered">
   <div class= "modal-content">
       <div class= "modal-header">
 
@@ -116,7 +117,7 @@
 
 <!-- Forma na lokalizáciu -->
 <div id="mymodal5" class="modal fade" role = "dialog"  tabindex="-1">
-  <div class= "modal-dialog">
+  <div class= "modal-dialog modal-dialog-centered">
   <div class= "modal-content">
       <div class= "modal-header">
 
@@ -147,8 +148,8 @@
 <!--Forma na lokalizáciu-->
 
 <!-- mapa lokalizacia -->
-<div id="locate" class="modal fade" role = "dialog"  tabindex="-1">
-  <div class= "modal-dialog">
+<div id="locate" class="modal fade" role = "dialog"  tabindex="-1" >
+  <div class="modal-dialog modal-xl">
   <div class= "modal-content">
       <div class= "modal-header">
 
@@ -158,30 +159,67 @@
 
           <form action ="{{url_for('located')}}" method="POST">
 
+         <div class="form-group">
+         <div style="overflow: auto">
+          <table class="table table-striped">
+          <thead>
+            <tr>
+            
+              <th scope="col">ID tagu</th>
+              <th scope="col">Spárovaný príkaz</th>
+              <th scope="col">ID zóny</th>
+              <th scope="col">Typ zóny</th>
+              <th scope="col">Názov zóny</th>
+              <th scope="col">Vstup do zóny</th>
+              
+              
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{mydata[0][0]}}</td>
+              <td>{{mydata[0][5]}}</td>
+              <td>{{mydata[0][1]}}</td>
+              <td>{{mydata[0][2]}}</td>
+              <td>{{mydata[0][3]}}</td>
+              <td>{{mydata[0][4]}}</td>  
+            </tr> 
+          </tbody>
+        </table>
+         </div>
+        </div>
+          </form>
+          
+<div class="container">
+ <div class="form-group">
+
+ <div class="text-center">
+<img src="{{ url_for('static',filename= 'layout.jpg') }}" class="mx-auto d-block img-thumbnail"  alt="Responsive image" >
+</div>
+
+<img src="{{ url_for('static',filename= 'dot.png') }}" class="blink_me"  alt="Responsive image" style= "position: absolute; bottom: {{mydata[0][6]}}px; right: {{mydata[0][7]}}px;background :rgba(0, 0, 0, 0);height:50px;width:auto">
+
+</div>
+ </div>
+        </form>
+
           <div class="form-group">
-              <label>Čiarový kód</label>
-              <input type="text" onClick="this.setSelectionRange(0, this.value.length)" class="form-control" name="tag_id" required="1">
-
-          </div>
-
-
-          <div class="form-group">
-              <button class="btn btn-primary" type="submit">Lokalizovať</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavrieť</button>
+               <button class="btn btn-secondary float-right" name="btn"  value= "close" type="submit">Zavrieť</button>
           </div>
 
           </form>
 
-      </div>
+     
     </div>
   </div>
-</div>      
-<!--Forma na lokalizáciu-->
+</div>  
+</div>    
+<!-- mapa lokalizacia -->
 
 <!-- Forma na preparovanie -->
 {%if i ==1%}
-<div id="preparovanie" class="modal fade" role = "dialog"  tabindex="-1">
-  <div class= "modal-dialog">
+<div id="preparovanie" class="modal fade" role = "dialog"  tabindex="-1" data-keyboard="false" data-backdrop="static">
+  <div class= "modal-dialog modal-dialog-centered">
   <div class= "modal-content">
       <div class= "modal-header">
 
@@ -196,6 +234,7 @@
               <p>Zadaný kód <b>{{code1}}</b> je už spárovaný. Chcete ho prepárovať s vami zadaným kódom <b>{{code2}}</b> :<p>
               
           </div>
+
 
           <div class="form-group">
               <button class="btn btn-primary" name="yes" value={{code1}}$,${{code2}} type="submit">Áno</button>
