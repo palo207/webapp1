@@ -148,6 +148,10 @@ def get_tag_info(tag_id):
         return True,my_data_parsed 
 
 
+@app.login_manager.unauthorized_handler
+def unauth_handler():
+    return redirect(url_for('login'))
+    
 
 # Logout button      
 @app.route('/logout')  
@@ -179,7 +183,8 @@ def Index():
     else:
         dsb=""
         
-    if 'my_data' in session:   
+    if 'my_data' in session and session.get('my_data'): 
+        
         mydata = session.get('my_data')
         tag_id=mydata[0][0] 
         got_data,mydata=get_tag_info(tag_id)
@@ -329,8 +334,9 @@ def locate():
 # Finishing the locate process
 @app.route('/located', methods =['GET','POST'])
 def located():
-    return redirect(url_for('Index',))
-    print('tu_som')
+    if request.method =='POST':
+        return redirect(url_for('Index'))
+   
     
 # =============================================================================
 # # Tag location based on dropdown

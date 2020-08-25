@@ -147,18 +147,21 @@
 </div>      
 <!--Forma na lokalizáciu-->
 
+{%if i ==2%}
 <!-- mapa lokalizacia -->
 <div id="locate" class="modal fade" role = "dialog"  tabindex="-1" >
   <div class="modal-dialog modal-xl">
   <div class= "modal-content">
+     
       <div class= "modal-header">
-
           <h4 class="modal-title">Lokalizácia tagu</h4>
       </div>
+      
+      
       <div class="modal-body">
-
           <form action ="{{url_for('located')}}" method="POST">
 
+<!--tabulka-->
          <div class="form-group">
          <div style="overflow: auto">
           <table class="table table-striped">
@@ -188,21 +191,21 @@
         </table>
          </div>
         </div>
-          </form>
+<!--tabulka-->       
+
           
 <div class="container">
- <div class="form-group">
+<div class="form-group">
 
- <div class="text-center">
+
+<div id="obrazky">
 <img src="{{ url_for('static',filename= 'layout.jpg') }}" class="mx-auto d-block img-thumbnail"  alt="Responsive image" >
+<img src="{{ url_for('static',filename= 'dot.png') }}" class="blink_me"   style= "position: absolute; bottom: {{mydata[0][6]}}px; right: {{mydata[0][7]}}px;background :rgba(0, 0, 0, 0);height:50px;width:auto">
 </div>
 
-<img src="{{ url_for('static',filename= 'dot.png') }}" class="blink_me"  alt="Responsive image" style= "position: absolute; bottom: {{mydata[0][6]}}px; right: {{mydata[0][7]}}px;background :rgba(0, 0, 0, 0);height:50px;width:auto">
 
 </div>
- </div>
-        </form>
-
+</div>
           <div class="form-group">
                <button class="btn btn-secondary float-right" name="btn"  value= "close" type="submit">Zavrieť</button>
           </div>
@@ -215,6 +218,7 @@
 </div>  
 </div>    
 <!-- mapa lokalizacia -->
+{%endif%}
 
 <!-- Forma na preparovanie -->
 {%if i ==1%}
