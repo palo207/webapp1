@@ -40,3 +40,20 @@ position: relative;
     opacity: 0.5;
   }
 }
+
+#obrazky{
+    
+    position: relative;
+}
+
+#bigone{
+     vertical-align: bottom;
+     position:relative;
+}
+
+#smallone{
+    top: 500;
+    left:600;
+    position:absolute;
+    height:50px;
+}
